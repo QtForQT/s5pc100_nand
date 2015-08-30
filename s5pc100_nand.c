@@ -194,6 +194,23 @@ int s5pc100_chip_errstat(struct mtd_info *mtd, struct nand_chip *this, int state
 int s5pc100_chip_write_page(struct mtd_info *mtd, struct nand_chip *chip,
 			const uint8_t *buf, int page, int cached, int raw);
 #endif
+static struct mtd_partition s5pc100_nand_partition[] = {
+	[0] = {
+		.name = "bootloader",
+		.size = SZ_1M,
+		.offset = 0,
+	},
+	[1] = {
+		.name = "kernel",
+		.offset = MTDPART_OFS_APPEND,
+		.size  = SZ_1M * 3,
+	},
+	[2] = {
+		.name = "rootfs",
+		.offset = MTDPART_OFS_APPEND,
+		.size = MTDPART_SIZ_FULL,
+	},
+};
 
 
 struct s5pc100_mtd_nand {
