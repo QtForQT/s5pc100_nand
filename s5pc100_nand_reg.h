@@ -33,6 +33,12 @@
 #define S5PC100_NFMLC8BITPT1 S5PC100_NFREG(0x64)
 #define S5PC100_NFACTADJ S5PC100_NFREG(0x68)
 
+#define S5PC100_NAND_ADDR_LEN 0x6c
+
+//---------------------------//
+#define S5PC100_NAND_STAT_BUSY (1<<28)
+#define S5PC100_NFCONT_ENABLE  (1<<0)
+
 #endif
 
 
