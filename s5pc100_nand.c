@@ -11,6 +11,7 @@
 #include <linux/mtd/nand_ecc.h>
 #include <linux/mtd/partitions.h>
 
+#include "s5pc100_nand_reg.h"
 
 #if 0
 /**
@@ -163,9 +164,10 @@ struct nand_chip {
 };
 
 #endif
-#if 0
-uint8_t s5pc100_chip_read_byte(struct mtd_info *mtd);
-u16 s5pc100_chip_read_word(struct mtd_info *mtd);
+#if 1
+//uint8_t s5pc100_chip_read_byte(struct mtd_info *mtd);
+//u16 s5pc100_chip_read_word(struct mtd_info *mtd);
+
 static void s5pc100_chip_write_buf(struct mtd_info *mtd, const uint8_t *buf, int len)
 {
 	struct nand_chip *this = mtd->priv;
@@ -176,23 +178,23 @@ static void s5pc100_chip_read_buf(struct mtd_info *mtd, uint8_t *buf, int len)
 	struct nand_chip *this = mtd->priv;
 	readsb(this->IO_ADDR_R, buf, len);
 }
-int vs5pc100_chip_erify_buf(struct mtd_info *mtd, const uint8_t *buf, int len);
-void s5pc100_chip_select_chip(struct mtd_info *mtd, int chip);
-int s5pc100_chip_block_bad(struct mtd_info *mtd, loff_t ofs, int getchip);
-int s5pc100_chip_block_markbad(struct mtd_info *mtd, loff_t ofs);
-void s5pc100_chip_cmd_ctrl(struct mtd_info *mtd, int dat, unsigned int ctrl);
-int s5pc100_chip_init_size(struct mtd_info *mtd, struct nand_chip *this,
-		u8 *id_data);
-int s5pc100_chip_dev_ready(struct mtd_info *mtd);
-void s5pc100_chip_cmdfunc(struct mtd_info *mtd, unsigned command, int column,
-		int page_addr);
-int s5pc100_chip_waitfunc(struct mtd_info *mtd, struct nand_chip *this);
-void s5pc100_chip_erase_cmd(struct mtd_info *mtd, int page);
-int s5pc100_chip_scan_bbt(struct mtd_info *mtd);
-int s5pc100_chip_errstat(struct mtd_info *mtd, struct nand_chip *this, int state,
-		int status, int page);
-int s5pc100_chip_write_page(struct mtd_info *mtd, struct nand_chip *chip,
-			const uint8_t *buf, int page, int cached, int raw);
+//int vs5pc100_chip_erify_buf(struct mtd_info *mtd, const uint8_t *buf, int len);
+//void s5pc100_chip_select_chip(struct mtd_info *mtd, int chip);
+//int s5pc100_chip_block_bad(struct mtd_info *mtd, loff_t ofs, int getchip);
+//int s5pc100_chip_block_markbad(struct mtd_info *mtd, loff_t ofs);
+//void s5pc100_chip_cmd_ctrl(struct mtd_info *mtd, int dat, unsigned int ctrl);
+//int s5pc100_chip_init_size(struct mtd_info *mtd, struct nand_chip *this,
+//		u8 *id_data);
+//int s5pc100_chip_dev_ready(struct mtd_info *mtd);
+//void s5pc100_chip_cmdfunc(struct mtd_info *mtd, unsigned command, int column,
+//		int page_addr);
+//int s5pc100_chip_waitfunc(struct mtd_info *mtd, struct nand_chip *this);
+//void s5pc100_chip_erase_cmd(struct mtd_info *mtd, int page);
+//int s5pc100_chip_scan_bbt(struct mtd_info *mtd);
+//int s5pc100_chip_errstat(struct mtd_info *mtd, struct nand_chip *this, int state,
+//		int status, int page);
+//int s5pc100_chip_write_page(struct mtd_info *mtd, struct nand_chip *chip,
+//			const uint8_t *buf, int page, int cached, int raw);
 #endif
 static struct mtd_partition s5pc100_nand_partition[] = {
 	[0] = {
@@ -212,13 +214,20 @@ static struct mtd_partition s5pc100_nand_partition[] = {
 	},
 };
 
-
 struct s5pc100_mtd_nand {
 	void __iomem *base;
 	struct mtd_info mtd_info;
 	struct nand_chip chip;
 };
 
+void struct nand_chip *get_chip(struct s5pc100_mtd_nand *d)
+{
+	return &d->chip;
+}
+void struct mtd_info *get_info(struct s5pc100_mtd_nand *d)
+{
+	return &d->mtd_info;
+}
 
 static int s5pc100_nand_devready(struct mtd_info *mtd)
 {
@@ -229,7 +238,7 @@ static int s5pc100_nand_devready(struct mtd_info *mtd)
 }
 
 
-static void s3c2410_nand_hwcontrol(struct mtd_info *mtd, int cmd, 
+static void s5pc100_nand_hwcontrol(struct mtd_info *mtd, int cmd, 
 		                                   unsigned int ctrl)
 {
 	struct s5pc100_mtd_nand *d = container_of(mtd,struct s5pc100_mtd_nand,mtd_info);
@@ -247,12 +256,16 @@ static void s3c2410_nand_hwcontrol(struct mtd_info *mtd, int cmd,
 
 static void hw_init_nand(struct s5pc100_mtd_nand  *d)
 {
-	d->mtd_info->priv = &data->chip;
-	d->chip.ecc.mode = NAND_ECC_SOFT;
-	d->chip->IO_ADDR_W = d->base + S5PC100_NFDATA;
-	d->chip->cmd_ctrl  = s5pc100_nand_hwcontrol;
-	d->chip->dev_ready = s5pc100_nand_devready;
-
+	struct nand_chip *chip = get_chip(d);
+	struct mtd_info  *info = get_info(d);
+	info->priv = chip;
+	chip->chip_delay   = 50;
+	chip->ecc.mode = NAND_ECC_SOFT;
+	chip->IO_ADDR_W = d->base + S5PC100_NFDATA;
+	chip->cmd_ctrl  = s5pc100_nand_hwcontrol;
+	chip->dev_ready = s5pc100_nand_devready;
+	chip->write_buf = s5pc100_chip_write_buf;
+	chip->read_buf  = s5pc100_chip_read_buf;
 }
 
 static void enable_nand_controler(struct s5pc100_mtd_nand *d)
