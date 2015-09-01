@@ -10,9 +10,11 @@
 #include <linux/mtd/nand.h>
 #include <linux/mtd/nand_ecc.h>
 #include <linux/mtd/partitions.h>
+#include <asm/io.h>
+#include <linux/io.h>
+#include <linux/slab.h>
 
 #include "s5pc100_nand_reg.h"
-
 #if 0
 /**
  * struct nand_chip - NAND Private Flash Chip Data
@@ -97,7 +99,6 @@
  *			correctable).
  * @write_page:		[REPLACEABLE] High-level page write function
  */
-
 struct nand_chip {
 	void __iomem *IO_ADDR_R;
 	void __iomem *IO_ADDR_W;
@@ -162,7 +163,6 @@ struct nand_chip {
 
 	void *priv;
 };
-
 #endif
 #if 1
 //uint8_t s5pc100_chip_read_byte(struct mtd_info *mtd);
@@ -220,11 +220,11 @@ struct s5pc100_mtd_nand {
 	struct nand_chip chip;
 };
 
-void struct nand_chip *get_chip(struct s5pc100_mtd_nand *d)
+static struct nand_chip *get_chip(struct s5pc100_mtd_nand *d)
 {
 	return &d->chip;
 }
-void struct mtd_info *get_info(struct s5pc100_mtd_nand *d)
+static struct mtd_info *get_info(struct s5pc100_mtd_nand *d)
 {
 	return &d->mtd_info;
 }
@@ -276,9 +276,9 @@ static void enable_nand_controler(struct s5pc100_mtd_nand *d)
 int s5pc100_nand_probe (struct platform_device *pdev)
 {
 	struct s5pc100_mtd_nand *data;
-	struct resource *res;
-	struct resource *area;
-	resource_size_t size;
+//	struct resource *res;
+//	struct resource *area;
+//	resource_size_t size;
 	int err = 0;
 	data =  kzalloc(sizeof(*data),GFP_KERNEL);
 	if (data == NULL ) {
@@ -302,20 +302,35 @@ int s5pc100_nand_probe (struct platform_device *pdev)
 	}
 	enable_nand_controler(data);
 	hw_init_nand(data);
+	if (nand_scan(&data->mtd_info, 1)) {
+		err = -ENXIO;
+		goto no_dev;
+	}
+
+	data->mtd_info.name = "s5pc_nand";
+	err = mtd_device_parse_register(&data->mtd_info, NULL, NULL,s5pc100_nand_partition,ARRAY_SIZE(s5pc100_nand_partition));
+	if (err) {
+		nand_release(&data->mtd_info);
+		goto no_dev;
+	}
 	return 0;
 fail:
 	return -1;
-
+no_dev:
+	return err;
 }
 
 int s5pc100_nand_remove(struct platform_device *dev)
 {
+	return 0;
 }
 
 #ifdef CONFIG_OF
 const struct of_device_id s5pc100_nand_id_table[] = {
 	{.compatible = "s5pc100-nand-control"},
 };
+#else
+#define s5pc100_nand_id_table NULL
 #endif
 struct platform_driver s5pc100_nand_driver = {
 	.probe = s5pc100_nand_probe ,
@@ -326,12 +341,12 @@ struct platform_driver s5pc100_nand_driver = {
 	},
 };
 
-static __init s5pc100_nand_init(void)
+static int  __init s5pc100_nand_init(void)
 {
 	return platform_driver_register(&s5pc100_nand_driver);
 }
 
-static __exit s5pc100_nand_exit(void)
+static void __exit s5pc100_nand_exit(void)
 {
 	return platform_driver_unregister(&s5pc100_nand_driver);
 }
