@@ -262,6 +262,7 @@ static void hw_init_nand(struct s5pc100_mtd_nand  *d)
 	chip->chip_delay   = 50;
 	chip->ecc.mode = NAND_ECC_SOFT;
 	chip->IO_ADDR_W = d->base + S5PC100_NFDATA;
+	chip->IO_ADDR_R = d->base + S5PC100_NFDATA;
 	chip->cmd_ctrl  = s5pc100_nand_hwcontrol;
 	chip->dev_ready = s5pc100_nand_devready;
 	chip->write_buf = s5pc100_chip_write_buf;
@@ -274,6 +275,11 @@ static void enable_nand_controler(struct s5pc100_mtd_nand *d)
 }
 
 int s5pc100_nand_probe (struct platform_device *pdev)
+{
+	pr_err("aaaaa");
+	return -1;
+}
+int s5pc100_nand_start(void)
 {
 	struct s5pc100_mtd_nand *data;
 //	struct resource *res;
@@ -313,6 +319,7 @@ int s5pc100_nand_probe (struct platform_device *pdev)
 		nand_release(&data->mtd_info);
 		goto no_dev;
 	}
+	pr_err("------------succeess---------\n");
 	return 0;
 fail:
 	return -1;
@@ -343,6 +350,8 @@ struct platform_driver s5pc100_nand_driver = {
 
 static int  __init s5pc100_nand_init(void)
 {
+	pr_err("----start--s5pc100 nand init \n");
+	s5pc100_nand_start();
 	return platform_driver_register(&s5pc100_nand_driver);
 }
 
