@@ -216,7 +216,7 @@ static struct mtd_partition s5pc100_nand_partition[] = {
 
 struct s5pc100_mtd_nand {
 	void __iomem *base;
-	struct clk   *clk
+	struct clk   *clk;
 	struct mtd_info mtd_info;
 	struct nand_chip chip;
 };
@@ -309,7 +309,7 @@ int s5pc100_nand_start(void)
 		goto fail;
 	}
 	platform_set_drvdata(pdev,data);
-	data->clk = clk_get(&pdev->dev,"nfconf");
+	data->clk = clk_get(&pdev->dev,"nfcon");
 	if (IS_ERR(data->clk)) {
 		pr_err("%s:no clk fond \n",__func__);
 		err = -1;
@@ -362,7 +362,7 @@ struct platform_driver s5pc100_nand_driver = {
 static int  __init s5pc100_nand_init(void)
 {
 	pr_err("----start--s5pc100 nand init \n");
-	s5pc100_nand_start();
+//	s5pc100_nand_start();
 	return platform_driver_register(&s5pc100_nand_driver);
 }
 
