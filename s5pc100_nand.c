@@ -216,6 +216,7 @@ static struct mtd_partition s5pc100_nand_partition[] = {
 
 struct s5pc100_mtd_nand {
 	void __iomem *base;
+	struct clk   *clk
 	struct mtd_info mtd_info;
 	struct nand_chip chip;
 };
@@ -276,22 +277,15 @@ static void enable_nand_controler(struct s5pc100_mtd_nand *d)
 
 int s5pc100_nand_probe (struct platform_device *pdev)
 {
-	pr_err("aaaaa");
+#if 0
 	return -1;
 }
 int s5pc100_nand_start(void)
 {
-	struct s5pc100_mtd_nand *data;
+#endif
 //	struct resource *res;
 //	struct resource *area;
 //	resource_size_t size;
-	int err = 0;
-	data =  kzalloc(sizeof(*data),GFP_KERNEL);
-	if (data == NULL ) {
-		pr_err("no memory for nand devices !!!\n");
-		return -ENOMEM;
-	}
-//	platform_set_drvdata(pdev,data);
 //	res  = pdev->resource;
 //	size = resource_size(res);
 //	area = request_mem_region(res->start,size );
@@ -300,12 +294,29 @@ int s5pc100_nand_start(void)
 //		return -ENOENT;
 //	}
 //
+
+	struct s5pc100_mtd_nand *data;
+	int err = 0;
+	data =  kzalloc(sizeof(*data),GFP_KERNEL);
+	if (data == NULL ) {
+		pr_err("no memory for nand devices !!!\n");
+		return -ENOMEM;
+	}
 #define phys_addr 0xE7200000
 	data->base = ioremap(phys_addr,S5PC100_NAND_ADDR_LEN);
 	if ( !data->base ) {
-		pr_err("ioremap error !!!\n");
+		pr_err("Io remap error !!!\n");
 		goto fail;
 	}
+	platform_set_drvdata(pdev,data);
+	data->clk = clk_get(&pdev->dev,"nfconf");
+	if (IS_ERR(data->clk)) {
+		pr_err("%s:no clk fond \n",__func__);
+		err = -1;
+		goto fail;
+	}
+	clk_enable(data->clk);
+
 	enable_nand_controler(data);
 	hw_init_nand(data);
 	if (nand_scan(&data->mtd_info, 1)) {
@@ -319,7 +330,7 @@ int s5pc100_nand_start(void)
 		nand_release(&data->mtd_info);
 		goto no_dev;
 	}
-	pr_err("------------succeess---------\n");
+	pr_err("------------success---------\n");
 	return 0;
 fail:
 	return -1;

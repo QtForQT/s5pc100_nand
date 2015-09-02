@@ -2,8 +2,9 @@
 
 #define __S5PC100_NAND_REG
 
-
+#define BIT(x) (1<<(x))
 #define S5PC100_NFREG(x) (x)
+
 
 #define S5PC100_NFCONF S5PC100_NFREG(0x00)
 #define S5PC100_NFCONT  S5PC100_NFREG(0x04)
@@ -38,7 +39,47 @@
 //---------------------------//
 #define S5PC100_NAND_STAT_BUSY (1<<28)
 #define S5PC100_NFCONT_ENABLE  (1<<0)
+/***************NFCONF*************/
+#define S5PC100_NFCONF_MLCClkCtrl BIT(30)
+#define S5PC100_NFCONF_MsgLength BIT(25)
+#define S5PC100_NFCONF_ECCType BIT(23)
+#define S5PC100_NFCONF_TACLS BIT(12)
+#define S5PC100_NFCONF_TWRPH0 BIT(8)
+#define S5PC100_NFCONF_TWRPH1 BIT(4)
+#define S5PC100_NFCONF_MLCFlash BIT(3)
+#define S5PC100_NFCONF_PageSize BIT(2)
+#define S5PC100_NFCONF_AddrCycle BIT(1)
+/***************NFCONT***************/
+#define S5PC100_NFCONT_Reg_nCE3 BIT(23)
+#define S5PC100_NFCONT_Reg_nCE2 BIT(22)
+#define S5PC100_NFCONT_MLCEccDirection BIT(18)
+#define S5PC100_NFCONT_LockTight BIT(17)
+#define S5PC100_NFCONT_LOCK BIT(16)
+#define S5PC100_NFCONT_EnbMLCEncInt BIT(13)
+#define S5PC100_NFCONT_EnbMLCDecInt BIT(12)
+#define S5PC100_NFCONT_MLCStop BIT(11)
+#define S5PC100_NFCONT_EnbIllegalAccINT BIT(10)
+#define S5PC100_NFCONT_EnbRnBINT BIT(9)
+#define S5PC100_NFCONT_RnB_TransMode BIT(8)
+#define S5PC100_NFCONT_MECCLock BIT(7)
+#define S5PC100_NFCONT_SECCLock BIT(6)
+#define S5PC100_NFCONT_InitMECC BIT(5)
+#define S5PC100_NFCONT_InitSECC BIT(4)
+#define S5PC100_NFCONT_HW_nCE BIT(3)
+#define S5PC100_NFCONT_Reg_nCE1 BIT(2)
+#define S5PC100_NFCONT_Reg_nCE0 BIT(1)
+#define S5PC100_NFCONT_MODE BIT(0)
+/***************NFSTAT*****************/
+#define S5PC100_NFSTAT_Flash_nCE0 BIT(2)
+#define S5PC100_NFSTAT_Flash_nCE1 BIT(3)
+#define S5PC100_NFSTAT_RnB_TransDetect BIT(4)
+#define S5PC100_NFSTAT_IllegalAccess BIT(5)
+#define S5PC100_NFSTAT_MLCDecodeDone BIT(6)
+#define S5PC100_NFSTAT_MLCEncodeDone BIT(7)
+#define S5PC100_NFSTAT_Flash_nCE BIT(8)
+#define S5PC100_NFSTAT_RnB_TransDetect BIT(24)
+#define S5PC100_NFSTAT_Flash_RnB_GRP BIT(28)
+
+
 
 #endif
-
-
