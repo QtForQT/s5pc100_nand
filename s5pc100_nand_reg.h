@@ -2,7 +2,10 @@
 
 #define __S5PC100_NAND_REG
 
+
+#ifndef BIT
 #define BIT(x) (1<<(x))
+#endif
 #define S5PC100_NFREG(x) (x)
 
 
@@ -72,7 +75,7 @@
 /***************NFSTAT*****************/
 #define S5PC100_NFSTAT_Flash_nCE0 BIT(2)
 #define S5PC100_NFSTAT_Flash_nCE1 BIT(3)
-#define S5PC100_NFSTAT_RnB_TransDetect BIT(4)
+#define S5PC100_NFSTAT_RnB_TransDetect1 BIT(4)
 #define S5PC100_NFSTAT_IllegalAccess BIT(5)
 #define S5PC100_NFSTAT_MLCDecodeDone BIT(6)
 #define S5PC100_NFSTAT_MLCEncodeDone BIT(7)
