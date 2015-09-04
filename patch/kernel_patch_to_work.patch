@@ -1,0 +1,60 @@
+diff --git a/arch/arm/configs/s5pc100_defconfig b/arch/arm/configs/s5pc100_defconfig
+index 41bafc9..14d4197 100644
+--- a/arch/arm/configs/s5pc100_defconfig
++++ b/arch/arm/configs/s5pc100_defconfig
+@@ -47,3 +47,11 @@ CONFIG_SYSCTL_SYSCALL_CHECK=y
+ CONFIG_DEBUG_USER=y
+ CONFIG_DEBUG_ERRORS=y
+ CONFIG_DEBUG_LL=y
++CONFIG_MTD=y
++CONFIG_MTD_BLOCK=y
++CONFIG_GENERIC_IO=y
++CONFIG_MTD_NAND=y
++CONFIG_MTD_NAND_ECC=y
++CONFIG_MTD_NAND_IDS=y
++CONFIG_MTD_BLKDEVS=y
++CONFIG_MTD_OOPS=y
+diff --git a/arch/arm/mach-s5pc100/mach-smdkc100.c b/arch/arm/mach-s5pc100/mach-smdkc100.c
+index 8c880f7..96ede24 100644
+--- a/arch/arm/mach-s5pc100/mach-smdkc100.c
++++ b/arch/arm/mach-s5pc100/mach-smdkc100.c
+@@ -134,6 +134,11 @@ static struct platform_device smdkc100_lcd_powerdev = {
+ 	.dev.platform_data	= &smdkc100_lcd_power_data,
+ };
+ 
++static struct platform_device s5pc100_nand_mtd = {
++	.name 			= "s5pc100-nand",
++	.id 			=-1,
++};
++
+ /* Frame Buffer */
+ static struct s3c_fb_pd_win smdkc100_fb_win0 = {
+ 	.max_bpp	= 32,
+@@ -201,6 +206,7 @@ static struct platform_device *smdkc100_devices[] __initdata = {
+ 	&samsung_device_keypad,
+ 	&s5pc100_device_ac97,
+ 	&s3c_device_rtc,
++	&s5pc100_nand_mtd,
+ 	&s5p_device_fimc0,
+ 	&s5p_device_fimc1,
+ 	&s5p_device_fimc2,
+diff --git a/drivers/mtd/nand/Makefile b/drivers/mtd/nand/Makefile
+index bb81891..93f3eda 100644
+--- a/drivers/mtd/nand/Makefile
++++ b/drivers/mtd/nand/Makefile
+@@ -50,5 +50,6 @@ obj-$(CONFIG_MTD_NAND_JZ4740)		+= jz4740_nand.o
+ obj-$(CONFIG_MTD_NAND_GPMI_NAND)	+= gpmi-nand/
+ obj-$(CONFIG_MTD_NAND_XWAY)		+= xway_nand.o
+ obj-$(CONFIG_MTD_NAND_BCM47XXNFLASH)	+= bcm47xxnflash/
++obj-y 					+= s5pc100_nand.o
+ 
+ nand-objs := nand_base.o nand_bbt.o
+diff --git a/mk.sh b/mk.sh
+index c12c4fc..595d4fd 100755
+--- a/mk.sh
++++ b/mk.sh
+@@ -6,3 +6,4 @@ fi
+ make O=OUT CROSS_COMPILE=arm-none-eabi- ARCH=arm s5pc100_defconfig
+ make O=OUT CROSS_COMPILE=arm-none-eabi- ARCH=arm -j8
+ cp OUT/arch/arm/boot/zImage ../tftpboot/
++cp OUT/arch/arm/boot/zImage /srv/tftp/
